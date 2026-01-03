@@ -1,0 +1,41 @@
+-- -- Create users table
+-- CREATE TABLE IF NOT EXISTS users (
+--   id SERIAL PRIMARY KEY,
+--   username VARCHAR(50) UNIQUE NOT NULL,
+--   email VARCHAR(100) UNIQUE NOT NULL,
+--   password VARCHAR(255) NOT NULL,
+--   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );
+
+-- -- Create snippets table
+-- CREATE TABLE IF NOT EXISTS snippets (
+--   id SERIAL PRIMARY KEY,
+--   user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+--   title VARCHAR(255) NOT NULL,
+--   category VARCHAR(50) NOT NULL,
+--   language VARCHAR(50) NOT NULL,
+--   story TEXT NOT NULL,
+--   code TEXT NOT NULL,
+--   before_code TEXT,
+--   tags TEXT[],
+--   author VARCHAR(100) NOT NULL,
+--   likes INTEGER DEFAULT 0,
+--   views INTEGER DEFAULT 0,
+--   comments INTEGER DEFAULT 0,
+--   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );
+
+-- -- Create comments table
+-- CREATE TABLE IF NOT EXISTS comments (
+--   id SERIAL PRIMARY KEY,
+--   snippet_id INTEGER REFERENCES snippets(id) ON DELETE CASCADE,
+--   user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+--   username VARCHAR(100) NOT NULL,
+--   comment_text TEXT NOT NULL,
+--   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );
+
+-- -- Create indexes
+-- CREATE INDEX IF NOT EXISTS idx_snippets_category ON snippets(category);
+-- CREATE INDEX IF NOT EXISTS idx_snippets_created_at ON snippets(created_at DESC);
+-- CREATE INDEX IF NOT EXISTS idx_comments_snippet ON comments(snippet_id);
