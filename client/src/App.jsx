@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Heart, MessageSquare, Eye, Code, Sparkles, Award, Clock, Zap, Plus, User, LogOut, LogIn, History } from 'lucide-react';
-import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
+import axios from 'axios';
 
 // const API_URL = 'http://localhost:5000/api';
 
@@ -53,7 +52,7 @@ const SnippetCard = ({ snippet, onClick, currentUser, userLikes }) => {
   const handleLike = async (e) => {
     e.stopPropagation();
     if (!currentUser) {
-      toast.success('Please login to like snippets!');
+      toast.error('Please login to like snippets!');
       return;
     }
     if (!liked) {
@@ -65,7 +64,7 @@ const SnippetCard = ({ snippet, onClick, currentUser, userLikes }) => {
         setLiked(true);
       } catch (error) {
         console.error('Error liking snippet:', error);
-        toast.success(error.response?.data?.error || 'Failed to like snippet');
+        toast.error(error.response?.data?.error || 'Failed to like snippet');
       }
     }
   };
@@ -157,7 +156,7 @@ const SnippetModal = ({ snippet, onClose, currentUser, userLikes, onLikeUpdate }
 
   const handleLike = async () => {
     if (!currentUser) {
-      toast.success('Please login to like snippets!');
+      toast.error('Please login to like snippets!');
       return;
     }
     if (!liked) {
@@ -170,7 +169,7 @@ const SnippetModal = ({ snippet, onClose, currentUser, userLikes, onLikeUpdate }
         if (onLikeUpdate) onLikeUpdate(snippet.id, response.data.likes);
       } catch (error) {
         console.error('Error liking snippet:', error);
-        toast.success(error.response?.data?.error || 'Failed to like snippet');
+        toast.error(error.response?.data?.error || 'Failed to like snippet');
       }
     }
   };
@@ -178,7 +177,7 @@ const SnippetModal = ({ snippet, onClose, currentUser, userLikes, onLikeUpdate }
   const handleAddComment = async (e) => {
     e.preventDefault();
     if (!currentUser) {
-      toast.success('Please login to comment!');
+      toast.error('Please login to comment!');
       return;
     }
     if (!newComment.trim()) return;
@@ -194,7 +193,7 @@ const SnippetModal = ({ snippet, onClose, currentUser, userLikes, onLikeUpdate }
       setNewComment('');
     } catch (error) {
       console.error('Error adding comment:', error);
-      toast.success('Failed to add comment');
+      toast.error('Failed to add comment');
     }
   };
 
@@ -339,14 +338,14 @@ const AuthModal = ({ mode, onClose, onSuccess }) => {
     try {
       if (mode === 'signup') {
         if (!formData.username || !formData.email || !formData.password) {
-          toast.success('Please fill all fields');
+          toast.error('Please fill all fields');
           return;
         }
         const response = await axios.post(`${API_URL}/auth/signup`, formData);
         onSuccess(response.data);
       } else {
         if (!formData.email || !formData.password) {
-          toast.success('Please fill all fields');
+          toast.error('Please fill all fields');
           return;
         }
         const response = await axios.post(`${API_URL}/auth/login`, formData);
@@ -354,7 +353,7 @@ const AuthModal = ({ mode, onClose, onSuccess }) => {
       }
     } catch (error) {
       console.error('Auth error:', error);
-      toast.success(error.response?.data?.error || 'Authentication failed');
+      toast.error(error.response?.data?.error || 'Authentication failed');
     }
   };
 
@@ -395,7 +394,7 @@ const AddSnippetModal = ({ onClose, onAdd, currentUser }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.title || !formData.story || !formData.code) {
-      toast.success('Please fill in all required fields');
+      toast.error('Please fill in all required fields');
       return;
     }
     const newSnippet = { ...formData, tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean), author: currentUser.username, date: new Date().toISOString().split('T')[0] };
@@ -666,80 +665,106 @@ export default function CodeMuseum() {
   return (
     <div className="min-h-screen bg-black text-white">
       <Toaster 
-        position="top-right"
+        position="top-center"
         toastOptions={{
+          className: '',
           style: {
             background: '#1f2937',
             color: '#fff',
             border: '1px solid #374151',
+            maxWidth: 'calc(100vw - 2rem)',
           },
           success: {
             iconTheme: {
               primary: '#10b981',
               secondary: '#fff',
             },
+            duration: 3000,
           },
           error: {
             iconTheme: {
               primary: '#ef4444',
               secondary: '#fff',
             },
+            duration: 4000,
           },
         }}
       />
 
       <div className="relative overflow-hidden border-b border-gray-800">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-black to-pink-900/20"></div>
-        <div className="relative max-w-7xl mx-auto px-6 py-16">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex-1"></div>
-            <div className="flex items-center gap-3">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-16">
+          <div className="flex flex-col sm:flex-row items-center justify-between mb-6 sm:mb-8 gap-4">
+            <div className="flex-1 hidden sm:block"></div>
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 w-full sm:w-auto">
               {currentUser ? (
                 <>
-                  <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition font-semibold"><Plus className="w-5 h-5" />Add Story</button>
-                  <button onClick={() => setShowAccountModal(true)} className="flex items-center gap-3 px-4 py-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition cursor-pointer">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm">{currentUser.username[0].toUpperCase()}</div>
-                    <span className="text-sm text-gray-300">{currentUser.username}</span>
+                  <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition font-semibold text-sm">
+                    <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="hidden sm:inline">Add Story</span>
+                    <span className="sm:hidden">Add</span>
                   </button>
-                  <button onClick={handleLogout} className="p-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition" title="Logout"><LogOut className="w-5 h-5 text-gray-400" /></button>
+                  <button onClick={() => setShowAccountModal(true)} className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition cursor-pointer">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-xs sm:text-sm">{currentUser.username[0].toUpperCase()}</div>
+                    <span className="text-xs sm:text-sm text-gray-300 hidden sm:inline">{currentUser.username}</span>
+                  </button>
+                  <button onClick={handleLogout} className="p-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition" title="Logout"><LogOut className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" /></button>
                 </>
               ) : (
                 <>
-                  <button onClick={() => setAuthModal('login')} className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition"><LogIn className="w-5 h-5" />Sign In</button>
-                  <button onClick={() => setAuthModal('signup')} className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition font-semibold"><User className="w-5 h-5" />Sign Up</button>
+                  <button onClick={() => setAuthModal('login')} className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition text-sm">
+                    <LogIn className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="hidden sm:inline">Sign In</span>
+                  </button>
+                  <button onClick={() => setAuthModal('signup')} className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition font-semibold text-sm">
+                    <User className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span>Sign Up</span>
+                  </button>
                 </>
               )}
             </div>
           </div>
           <div className="text-center">
-            <div className="inline-flex items-center gap-3 mb-4">
-              <Code className="w-12 h-12 text-purple-400" />
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">Code Snippet Museum</h1>
+            <div className="flex flex-col sm:inline-flex sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+              <Code className="w-8 h-8 sm:w-12 sm:h-12 text-purple-400" />
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">Code Snippet Museum</h1>
             </div>
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto">A curated gallery of legendary code snippets, battle-tested bugs, and elegant solutions from developers around the world</p>
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-400 max-w-2xl mx-auto px-4">A curated gallery of legendary code snippets, battle-tested bugs, and elegant solutions from developers around the world</p>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-8">
-          <div className="w-full md:w-96">
-            <input type="text" placeholder="Search snippets, tags, stories..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full px-4 py-3 bg-gray-900 border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="flex flex-col gap-4 mb-6 sm:mb-8">
+          <div className="w-full">
+            <input 
+              type="text" 
+              placeholder="Search snippets, tags, stories..." 
+              value={searchTerm} 
+              onChange={(e) => setSearchTerm(e.target.value)} 
+              className="w-full px-4 py-3 bg-gray-900 border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition text-sm sm:text-base" 
+            />
           </div>
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-2 flex-wrap justify-center sm:justify-start">
             {categories.map(cat => (
-              <button key={cat} onClick={() => setFilter(cat)} className={`px-4 py-2 rounded-lg font-medium transition ${filter === cat ? 'bg-purple-600 text-white' : 'bg-gray-900 text-gray-400 hover:bg-gray-800'}`}>{cat}</button>
+              <button 
+                key={cat} 
+                onClick={() => setFilter(cat)} 
+                className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition text-xs sm:text-sm ${filter === cat ? 'bg-purple-600 text-white' : 'bg-gray-900 text-gray-400 hover:bg-gray-800'}`}
+              >
+                {cat}
+              </button>
             ))}
           </div>
         </div>
 
         {loading ? (
-          <div className="col-span-full text-center py-16">
-            <div className="inline-block w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p className="text-gray-400">Loading snippets...</p>
+          <div className="col-span-full text-center py-12 sm:py-16">
+            <div className="inline-block w-12 h-12 sm:w-16 sm:h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p className="text-gray-400 text-sm sm:text-base">Loading snippets...</p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {filteredSnippets.map(snippet => (
               <SnippetCard key={snippet.id} snippet={snippet} currentUser={currentUser} userLikes={userLikes} onClick={() => setSelectedSnippet(snippet)} />
             ))}
@@ -747,9 +772,9 @@ export default function CodeMuseum() {
         )}
 
         {filteredSnippets.length === 0 && !loading && (
-          <div className="text-center py-16">
-            <Code className="w-16 h-16 text-gray-700 mx-auto mb-4" />
-            <p className="text-xl text-gray-500">No snippets found matching your criteria</p>
+          <div className="text-center py-12 sm:py-16">
+            <Code className="w-12 h-12 sm:w-16 sm:h-16 text-gray-700 mx-auto mb-4" />
+            <p className="text-base sm:text-xl text-gray-500">No snippets found matching your criteria</p>
           </div>
         )}
       </div>
@@ -769,3 +794,5 @@ export default function CodeMuseum() {
     </div>
   );
 }
+
+        

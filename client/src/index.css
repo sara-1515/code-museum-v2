@@ -20,3 +20,164 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Prevent horizontal scroll on mobile */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Better touch targets on mobile */
+@media (max-width: 640px) {
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Fix text overflow */
+* {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 768px) {
+  /* Ensure modals fit on small screens */
+  .fixed {
+    padding: 0 !important;
+  }
+
+  /* Better spacing for mobile */
+  .p-8 {
+    padding: 1.5rem !important;
+  }
+
+  .p-6 {
+    padding: 1rem !important;
+  }
+
+  /* Smaller text on mobile */
+  .text-5xl {
+    font-size: 2rem !important;
+    line-height: 2.5rem !important;
+  }
+
+  .text-3xl {
+    font-size: 1.5rem !important;
+    line-height: 2rem !important;
+  }
+
+  .text-xl {
+    font-size: 1rem !important;
+    line-height: 1.5rem !important;
+  }
+
+  /* Better button sizing */
+  button {
+    padding: 0.75rem 1rem !important;
+  }
+
+  /* Make cards stack better */
+  .grid {
+    gap: 1rem !important;
+  }
+
+  /* Improve code block readability */
+  pre {
+    font-size: 0.75rem !important;
+  }
+
+  /* Better modal sizing */
+  .max-w-5xl, .max-w-4xl {
+    max-width: 95vw !important;
+  }
+
+  /* Fix header on mobile */
+  .py-16 {
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 375px) {
+  .text-5xl {
+    font-size: 1.5rem !important;
+    line-height: 2rem !important;
+  }
+
+  .px-6 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Better focus states for accessibility */
+button:focus, input:focus, textarea:focus, select:focus {
+  outline: 2px solid #9333ea;
+  outline-offset: 2px;
+}
+
+/* Improve tap highlight color on mobile */
+* {
+  -webkit-tap-highlight-color: rgba(147, 51, 234, 0.2);
+}
+
+/* Better scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Toast notifications mobile positioning */
+@media (max-width: 640px) {
+  [data-hot-toast] {
+    max-width: calc(100vw - 2rem) !important;
+  }
+}
+
+/* Prevent zoom on input focus (iOS) */
+@media (max-width: 768px) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+
+/* Safe area insets for notched devices */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+  }
+}
