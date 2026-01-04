@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Heart, MessageSquare, Eye, Code, Sparkles, Award, Clock, Zap, Plus, User, LogOut, LogIn, History } from 'lucide-react';
 import axios from 'axios';
+import toast, { Toaster } from 'react-hot-toast';
 
 // const API_URL = 'http://localhost:5000/api';
 
@@ -52,7 +53,7 @@ const SnippetCard = ({ snippet, onClick, currentUser, userLikes }) => {
   const handleLike = async (e) => {
     e.stopPropagation();
     if (!currentUser) {
-      alert('Please login to like snippets!');
+      toast.success('Please login to like snippets!');
       return;
     }
     if (!liked) {
@@ -64,7 +65,7 @@ const SnippetCard = ({ snippet, onClick, currentUser, userLikes }) => {
         setLiked(true);
       } catch (error) {
         console.error('Error liking snippet:', error);
-        alert(error.response?.data?.error || 'Failed to like snippet');
+        toast.success(error.response?.data?.error || 'Failed to like snippet');
       }
     }
   };
@@ -156,7 +157,7 @@ const SnippetModal = ({ snippet, onClose, currentUser, userLikes, onLikeUpdate }
 
   const handleLike = async () => {
     if (!currentUser) {
-      alert('Please login to like snippets!');
+      toast.success('Please login to like snippets!');
       return;
     }
     if (!liked) {
@@ -169,7 +170,7 @@ const SnippetModal = ({ snippet, onClose, currentUser, userLikes, onLikeUpdate }
         if (onLikeUpdate) onLikeUpdate(snippet.id, response.data.likes);
       } catch (error) {
         console.error('Error liking snippet:', error);
-        alert(error.response?.data?.error || 'Failed to like snippet');
+        toast.success(error.response?.data?.error || 'Failed to like snippet');
       }
     }
   };
@@ -177,7 +178,7 @@ const SnippetModal = ({ snippet, onClose, currentUser, userLikes, onLikeUpdate }
   const handleAddComment = async (e) => {
     e.preventDefault();
     if (!currentUser) {
-      alert('Please login to comment!');
+      toast.success('Please login to comment!');
       return;
     }
     if (!newComment.trim()) return;
@@ -193,7 +194,7 @@ const SnippetModal = ({ snippet, onClose, currentUser, userLikes, onLikeUpdate }
       setNewComment('');
     } catch (error) {
       console.error('Error adding comment:', error);
-      alert('Failed to add comment');
+      toast.success('Failed to add comment');
     }
   };
 
@@ -338,14 +339,14 @@ const AuthModal = ({ mode, onClose, onSuccess }) => {
     try {
       if (mode === 'signup') {
         if (!formData.username || !formData.email || !formData.password) {
-          alert('Please fill all fields');
+          toast.success('Please fill all fields');
           return;
         }
         const response = await axios.post(`${API_URL}/auth/signup`, formData);
         onSuccess(response.data);
       } else {
         if (!formData.email || !formData.password) {
-          alert('Please fill all fields');
+          toast.success('Please fill all fields');
           return;
         }
         const response = await axios.post(`${API_URL}/auth/login`, formData);
@@ -353,7 +354,7 @@ const AuthModal = ({ mode, onClose, onSuccess }) => {
       }
     } catch (error) {
       console.error('Auth error:', error);
-      alert(error.response?.data?.error || 'Authentication failed');
+      toast.success(error.response?.data?.error || 'Authentication failed');
     }
   };
 
@@ -394,7 +395,7 @@ const AddSnippetModal = ({ onClose, onAdd, currentUser }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.title || !formData.story || !formData.code) {
-      alert('Please fill in all required fields');
+      toast.success('Please fill in all required fields');
       return;
     }
     const newSnippet = { ...formData, tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean), author: currentUser.username, date: new Date().toISOString().split('T')[0] };
@@ -457,7 +458,7 @@ const AddSnippetModal = ({ onClose, onAdd, currentUser }) => {
 };
 
 
-const AccountModal = ({ onClose, currentUser, snippets, onDelete }) => {
+const AccountModal = ({ onClose, currentUser, snippets, onDelete, onAddStory }) => {
   const userSnippets = snippets.filter(s => s.author === currentUser.username);
   const totalLikes = userSnippets.reduce((sum, s) => sum + s.likes, 0);
   const totalViews = userSnippets.reduce((sum, s) => sum + s.views, 0);
@@ -494,8 +495,10 @@ const AccountModal = ({ onClose, currentUser, snippets, onDelete }) => {
                   <Code className="w-16 h-16 text-gray-600 mx-auto mb-4" />
                   <p className="text-gray-400">You haven't shared any snippets yet</p>
                   <button
-                    onClick={() => 
-                      {onClose(); 
+                    onClick={() => {
+                      onClose();
+                      onAddStory();
+                      // Trigger the add snippet modal
                       document.querySelector('[data-add-story-btn]')?.click();
                     }}
                     className="mt-4 px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
@@ -556,24 +559,14 @@ export default function CodeMuseum() {
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [snippets, setSnippets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userLikes, setUserLikes] = useState([]);
 
   useEffect(() => {
     fetchSnippets();
-  }, []);
-
-  // const fetchSnippets = async () => {
-  //   try {
-  //     setLoading(true);
-  //     const response = await axios.get(`${API_URL}/snippets`);
-  //     setSnippets(response.data);
-  //   } catch (error) {
-  //     console.error('Error fetching snippets:', error);
-  //     setSnippets([{id:1,title:"The Null Pointer That Cost 3 Days",category:"Bug Fix",language:"JavaScript",author:"Sarah Chen",date:"2024-11-15",story:"After three sleepless nights debugging a production crash, I finally found it.",before_code:"const userName = user.profile.name;",code:"const userName = user?.profile?.name || 'Anonymous';",likes:234,views:1523,comments:42,tags:["debugging","javascript"]}]);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
+    if (currentUser) {
+      fetchUserLikes();
+    }
+  }, [currentUser]);
 
   const fetchSnippets = async () => {
     try {
@@ -582,10 +575,19 @@ export default function CodeMuseum() {
       setSnippets(response.data);
     } catch (error) {
       console.error('Error fetching snippets:', error);
-      setSnippets([]); // Empty array instead of dummy data
-      alert('Failed to load snippets. Make sure backend is running!');
+      setSnippets([]);
+      toast.error('Failed to load snippets');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUserLikes = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/users/${currentUser.id}/likes`);
+      setUserLikes(response.data);
+    } catch (error) {
+      console.error('Error fetching user likes:', error);
     }
   };
 
@@ -603,41 +605,39 @@ export default function CodeMuseum() {
     setCurrentUser(userData);
     setAuthModal(null);
     localStorage.setItem('currentUser', JSON.stringify(userData));
-    alert(`Welcome ${userData.username}!`);
+    toast.success(`Welcome ${userData.username}!`);
   };
 
   const handleLogout = () => {
     setCurrentUser(null);
     localStorage.removeItem('currentUser');
-    // Also clear any auth tokens if you add them later
-    alert('Logged out successfully!');
-    // Optional: reload to reset state
+    toast.success('Logged out successfully!');
     window.location.reload();
   };
 
   const handleAddSnippet = async (newSnippet) => {
-    if (!currentUser) {  // ← ADDED CHECK
-      alert('Please login to add snippets!');
+    if (!currentUser) {
+      toast.error('Please login to add snippets!');
       return;
     }
     try {
       const snippetData = {
         ...newSnippet,
-        user_id: currentUser.id  // ← THIS WAS ADDED
+        user_id: currentUser.id
       };
       const response = await axios.post(`${API_URL}/snippets`, snippetData);
       setSnippets([response.data, ...snippets]);
       setShowAddModal(false);
-      alert('Your snippet has been added to the museum!');
+      toast.success('Snippet added successfully!');
     } catch (error) {
       console.error('Error adding snippet:', error);
-      alert(error.response?.data?.error || 'Failed to add snippet. Please try again.');  // ← BETTER ERROR
+      toast.error(error.response?.data?.error || 'Failed to add snippet');
     }
   };
 
   const handleDeleteSnippet = async (snippetId) => {
     if (!currentUser) {
-      alert('Please login to delete snippets!');
+      toast.error('Please login to delete snippets!');
       return;
     }
 
@@ -651,15 +651,43 @@ export default function CodeMuseum() {
       });
       
       setSnippets(snippets.filter(s => s.id !== snippetId));
-      alert('Snippet deleted successfully!');
+      toast.success('Snippet deleted successfully!');
     } catch (error) {
       console.error('Error deleting snippet:', error);
-      alert(error.response?.data?.error || 'Failed to delete snippet');
+      toast.error(error.response?.data?.error || 'Failed to delete snippet');
     }
+  };
+
+  const handleLikeUpdate = (snippetId, newLikes) => {
+    setSnippets(snippets.map(s => s.id === snippetId ? {...s, likes: newLikes} : s));
+    setUserLikes([...userLikes, snippetId]);
   };
 
   return (
     <div className="min-h-screen bg-black text-white">
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: '#1f2937',
+            color: '#fff',
+            border: '1px solid #374151',
+          },
+          success: {
+            iconTheme: {
+              primary: '#10b981',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
+
       <div className="relative overflow-hidden border-b border-gray-800">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-black to-pink-900/20"></div>
         <div className="relative max-w-7xl mx-auto px-6 py-16">
@@ -713,7 +741,7 @@ export default function CodeMuseum() {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredSnippets.map(snippet => (
-              <SnippetCard key={snippet.id} snippet={snippet} currentUser={currentUser} onClick={() => setSelectedSnippet(snippet)} />
+              <SnippetCard key={snippet.id} snippet={snippet} currentUser={currentUser} userLikes={userLikes} onClick={() => setSelectedSnippet(snippet)} />
             ))}
           </div>
         )}
@@ -726,11 +754,18 @@ export default function CodeMuseum() {
         )}
       </div>
 
-      {selectedSnippet && <SnippetModal snippet={selectedSnippet} currentUser={currentUser} onClose={() => setSelectedSnippet(null)} />}
+      {selectedSnippet && <SnippetModal snippet={selectedSnippet} currentUser={currentUser} userLikes={userLikes} onLikeUpdate={handleLikeUpdate} onClose={() => setSelectedSnippet(null)} />}
       {authModal && <AuthModal mode={authModal} onClose={() => setAuthModal(null)} onSuccess={handleAuth} />}
       {showAddModal && <AddSnippetModal currentUser={currentUser} onClose={() => setShowAddModal(false)} onAdd={handleAddSnippet} />}
-      {showAccountModal && currentUser && <AccountModal currentUser={currentUser} snippets={snippets} onClose={() => setShowAccountModal(false)} />}
-      {showAccountModal && currentUser && (<AccountModal currentUser={currentUser} snippets={snippets} onClose={() => setShowAccountModal(false)}onDelete={handleDeleteSnippet} />)}
+      {showAccountModal && currentUser && (
+        <AccountModal 
+          currentUser={currentUser} 
+          snippets={snippets} 
+          onClose={() => setShowAccountModal(false)}
+          onDelete={handleDeleteSnippet}
+          onAddStory={() => setShowAddModal(true)}
+        />
+      )}
     </div>
   );
 }
