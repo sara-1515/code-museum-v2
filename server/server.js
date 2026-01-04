@@ -32,6 +32,24 @@ pool.query('SELECT NOW()', (err, res) => {
   }
 });
 
+app.get('/api/test-db', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT NOW()');
+    res.json({ 
+      success: true, 
+      time: result.rows[0].now,
+      message: 'Database connected!'
+    });
+  } catch (err) {
+    res.status(500).json({ 
+      success: false,
+      error: err.message,
+      code: err.code,
+      hint: err.hint
+    });
+  }
+});
+
 // ============ ROUTES ============
 
 // Get all snippets
