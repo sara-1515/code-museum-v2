@@ -11,7 +11,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cors({
   origin: [
     'http://localhost:3000',
-    'https://code-museum-v2-frontend.vercel.app/'  // ← Add your actual frontend URL
+    'https://code-museum-v2-frontend.vercel.app'  // ← Add your actual frontend URL
   ],
   credentials: true
 }));
