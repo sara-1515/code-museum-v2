@@ -9,9 +9,13 @@ const app = express();
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cors({
-  origin: process.env.CLIENT_URL || '*',
+  origin: [
+    'http://localhost:3000',
+    'https://code-museum-v2-frontend.vercel.app/'  // ← Add your actual frontend URL
+  ],
   credentials: true
 }));
+
 
 // Database connection
 const pool = new Pool({
